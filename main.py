@@ -3,10 +3,11 @@ from Automaton import Automaton
 from os.path import exists
 
 from tools import *
-global  names
+global names
 
 running = True
 automatons = []
+
 
 def list_automatons(args):
     print(str(len(automatons))+" loaded automaton(s)")
@@ -16,27 +17,32 @@ def quit(args):
     global running
     running = False
 
+
 def display(args):
     if args.isdigit():
         ind = int(args)
         if ind < len(automatons):
             automatons[ind].display()
         else:
-            print("Index out of range, you can check the list of loaded automatons with  the command list")
+            print(
+                "Index out of range, you can check the list of loaded automatons with  the command list")
     else:
         print("Invalid argument, disp takes an integer as argument")
+
 
 def create_deter(args):
     if args.isdigit():
         ind = int(args)
-        if ind<len(automatons):
+        if ind < len(automatons):
             new = deter(automatons[int(args)])
             automatons.append(new)
         else:
-            print("Index out of range, you can check the list of loaded automatons with  the command list")
+            print(
+                "Index out of range, you can check the list of loaded automatons with  the command list")
     else:
         print("Invalid argument, determine takes an integer as argument")
-        
+
+
 def load(args):
     if exists("txt/"+args+".txt"):
         new = Automaton()
@@ -45,6 +51,7 @@ def load(args):
         print(args+".txt loaded")
     else:
         print("Unable to load "+args+".txt. Make sure it's in txt/ and try again")
+
 
 def doc(args):
     global commands
@@ -57,7 +64,8 @@ def doc(args):
         for cmd in commands:
             doc(cmd)
     elif args not in commands:
-        print("Cannot find help for '",args,"', type 'help' for a list of commands",sep='')
+        print("Cannot find help for '", args,
+              "', type 'help' for a list of commands", sep='')
     elif args == "help":
         print("\nHELP [command] [-all]")
         print(' '*8 + "command - displays the usage of command")
@@ -80,12 +88,14 @@ def doc(args):
 
     elif args == "determine":
         print("\nDETERMINE index")
-        print(' '*8 + "index - saves a determinized copy of the automaton at the given index")
+        print(
+            ' '*8 + "index - saves a determinized copy of the automaton at the given index")
 
 
+commands = {"help": doc, "quit": quit, "add": load,
+            "list": list_automatons, "disp": display, "determine": create_deter}
 
 
-commands = {"help":doc, "quit":quit, "add":load, "list":list_automatons, "disp":display, "determine":create_deter}
 def parse(entree):
     global commands
     entree = entree.lower()
@@ -95,7 +105,6 @@ def parse(entree):
         commands[entree[0]](entree[1])
     else:
         print("Invalid command, type help for a list of commands")
-
 
 
 while running:

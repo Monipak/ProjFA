@@ -1,9 +1,11 @@
 from enum import auto
 from xmlrpc.client import Boolean
 from Automaton import Automaton
-from copy import deepcopy as copy #deepcopy copie tout ce qui est dynamique dedans
+# deepcopy copie tout ce qui est dynamique dedans
+from copy import deepcopy as copy
 
-def union(l1,l2):
+
+def union(l1, l2):
     res = l1.copy()
     for i in l2:
         if i not in res:
@@ -11,7 +13,8 @@ def union(l1,l2):
     res.sort()
     return res
 
-def check(automaton : Automaton, string : str) -> bool: #ne marche pas avec le char vide !!
+
+def check(automaton: Automaton, string: str) -> bool:  # ne marche pas avec le char vide !!
     cursors = automaton.ini.copy()
     table = automaton.table
 
@@ -24,16 +27,17 @@ def check(automaton : Automaton, string : str) -> bool: #ne marche pas avec le c
                 for path in table[cur].get(char):
                     if path not in n_cursors:
                         n_cursors.append(path)
-        
+
         cursors = n_cursors
 
     for cur in cursors:
         if cur in automaton.end:
             return True
-    
+
     return False
 
-def standard(automaton : Automaton) -> Automaton:
+
+def standard(automaton: Automaton) -> Automaton:
     new = copy(automaton)
     trans = {}
     for state in new.ini:
@@ -44,25 +48,26 @@ def standard(automaton : Automaton) -> Automaton:
                 for jump in new.table[state][char]:
                     if jump not in trans[char]:
                         trans[char].append(jump)
-    
+
     new.table.append(trans)
     new.ini = [len(new.table)-1]
 
     return new
 
-def deter(base : Automaton) -> Automaton:
+
+def deter(base: Automaton) -> Automaton:
     new = Automaton()
     pseudo_states = [base.ini.copy()]
     new.ini = [0]
 
-    stake = [base.ini.copy()] #états non traités, utilisé comme une pile
+    stake = [base.ini.copy()]  # états non traités, utilisé comme une pile
 
     state = 0
     while stake:
         trans = {}
         alias_trans = {}
         pseudo_state = stake.pop()
-        #fusion des transitions des pseudo états
+        # fusion des transitions des pseudo états
         for i in pseudo_state:
             if i in base.end and state not in new.end:
                 new.end.append(state)
@@ -75,23 +80,21 @@ def deter(base : Automaton) -> Automaton:
                 else:
                     trans[char] = union(base.table[i][char], trans[char])
 
-        
         for char in trans:
             if trans[char] not in pseudo_states:
-                    pseudo_states.append(trans[char])
+                pseudo_states.append(trans[char])
 
             index = pseudo_states.index(trans[char])
             if trans[char] not in stake and index > state:
                 stake.append(trans[char])
-            alias_trans[char] = [index] # dans la nouvelle transition, on mets l'index qui correspond au pseudo état, on as une liste de taille 1
+            # dans la nouvelle transition, on mets l'index qui correspond au pseudo état, on as une liste de taille 1
+            alias_trans[char] = [index]
 
         new.table.append(alias_trans.copy())
 
-        
         state += 1
 
     return new
-
 
 
 def complete(base: Automaton) -> Automaton:
@@ -106,9 +109,8 @@ def complete(base: Automaton) -> Automaton:
     new.table.append(bin_trans)
     return new
 
-    
 
-def complement(automaton : Automaton) -> Automaton: #ne passer qu'un déter !!!
+def complement(automaton: Automaton) -> Automaton:  # ne passer qu'un déter !!!
     new = copy(automaton)
     for i in range(len(automaton.table)):
         if i in automaton.end:
@@ -116,7 +118,7 @@ def complement(automaton : Automaton) -> Automaton: #ne passer qu'un déter !!!
         else:
             new.end.append(i)
 
-    return new 
+    return new
 
 
 def is_standard(base: Automaton) -> bool:
@@ -129,12 +131,14 @@ def is_standard(base: Automaton) -> bool:
                     return False
     return True
 
+
 def is_complete(base: Automaton) -> bool:
     for trans in base.table:
         for char in base.univ:
             if not trans.get(char):
                 return False
     return True
+
 
 if __name__ == "__main__":
     a = Automaton()
@@ -148,5 +152,4 @@ if __name__ == "__main__":
     a = deter(a)
     a.display()
 
-
-    #pass
+    # pass
