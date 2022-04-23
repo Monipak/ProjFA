@@ -42,9 +42,9 @@ class Automaton():
     def display(self):
         to_disp =' '*8
         tran = ''
-
         for char in self.univ:
             to_disp += char + ' '*10
+
 
         for i in range(len(self.table)):
 
@@ -65,6 +65,35 @@ class Automaton():
                 to_disp+= tran+"║ "
         
         print(to_disp)
+
+    def display_alias(self):
+        to_disp =' '*8
+        tran = ''
+        for char in self.univ:
+            to_disp += char + ' '*10
+
+
+        for i in range(len(self.table)):
+
+            if i in self.ini and i in self.end:
+                to_disp += "\n<> "+ self.alias[i] +" ║ "
+            elif i in self.ini:
+                to_disp += "\n-> "+ self.alias[i] +" ║ "
+            elif i in self.end:
+                to_disp += "\n<- "+ self.alias[i] +" ║ "
+            else:
+                to_disp += "\n   "+ self.alias[i] +" ║ "
+            for char in self.univ:
+                if self.table[i].get(char):
+                    for state in self.table[i][char]:
+                        tran += self.alias[i] +','
+                    tran += (9-len(tran))*' '
+                else:
+                    tran = ' '*9 
+                to_disp+= tran+"║ "
+        
+        print(to_disp)
+
 
     def raw_disp(self):
         for i in self.table:

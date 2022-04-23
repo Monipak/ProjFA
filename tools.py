@@ -1,5 +1,3 @@
-from enum import auto
-from xmlrpc.client import Boolean
 from Automaton import Automaton
 # deepcopy copie tout ce qui est dynamique dedans
 from copy import deepcopy as copy
@@ -22,6 +20,8 @@ def check(automaton: Automaton, string: str) -> bool:  # ne marche pas avec le c
         n_cursors = cursors.copy()
         for cur in cursors:
             n_cursors.remove(cur)
+
+
         for cur in cursors:
             if table[cur].get(char):
                 for path in table[cur].get(char):
@@ -42,12 +42,12 @@ def standard(automaton: Automaton) -> Automaton:
     trans = {}
     for state in new.ini:
         for char in new.table[state]:
+
             if char not in trans:
                 trans[char] = new.table[state][char].copy()
             else:
-                for jump in new.table[state][char]:
-                    if jump not in trans[char]:
-                        trans[char].append(jump)
+                trans[char] = union(new.table[state][char].copy(),
+                                    trans[char])
 
     new.table.append(trans)
     new.ini = [len(new.table)-1]
@@ -71,6 +71,7 @@ def deter(base: Automaton) -> Automaton:
         for i in pseudo_state:
             if i in base.end and state not in new.end:
                 new.end.append(state)
+            
             for char in base.table[i]:
                 if char not in new.univ:
                     new.univ.append(char)
@@ -93,7 +94,9 @@ def deter(base: Automaton) -> Automaton:
         new.table.append(alias_trans.copy())
 
         state += 1
-
+    for i in range(len(pseudo_states)):
+        new.alias[i] = str(pseudo_states[i])[1:-1].replace(' ','')
+    print(new.alias)
     return new
 
 
@@ -133,12 +136,19 @@ def is_standard(base: Automaton) -> bool:
 
 
 def is_complete(base: Automaton) -> bool:
+    
     for trans in base.table:
-        for char in base.univ:
-            if not trans.get(char):
-                return False
+        if len(trans) != len(base.univ):
+            return False
     return True
 
+def is_deterministic(base: Automaton) -> bool:
+    
+    for trans in base.table:
+        for action in trans:
+            if len(trans[action]) > 1:
+                return False
+    return True and is_complete(base)
 
 if __name__ == "__main__":
     a = Automaton()
@@ -151,5 +161,8 @@ if __name__ == "__main__":
 
     a = deter(a)
     a.display()
+    a.display_alias()
 
+    a = complement(a)
+    a.display()
     # pass
