@@ -2,6 +2,7 @@ from Automaton import Automaton
 # deepcopy copie tout ce qui est dynamique dans un objet (leeeeeeeeeent)
 from copy import deepcopy as copy
 
+#------------------USEFUL FUNCTIONS-------------------------------
 def union(l1, l2):
     res = l1.copy()
     for i in l2:
@@ -9,39 +10,6 @@ def union(l1, l2):
             res.append(i)
     res.sort()
     return res
-
-            
-
-
-
-
-def minimise(base: Automaton) -> Automaton:
-    """Transforms a CDFA to a MCDFA"""
-    partitions = [list(range(len(base.table)))] # = [ [0,1,...,n] ], logically the first partition is the whole automaton.
-    done = False
-    while not done:
-        new_parts = partitions.copy()
-
-        if len(partitions) == 1: #This only happens at the first iteration
-            new_parts.remove(partitions[0]) #we remove the partition, as it will be replaced by the spanned sub-groups
-            for part in divide_part(base, partitions[0], base.end): #As this is the first iteration, the checked group is the outputs
-                new_parts.append(part)
-        else:
-            for part in partitions:
-                new_parts.remove(part)
-                for part in divide_part(base, part, part): #At any other iteration, we only check if its in or out
-                    new_parts.append(part)
-
-        new_parts.sort(key= lambda l: l[0]) #we need to sort to enable list comparisons
-        if new_parts == partitions:
-            done = True
-            if len(partitions) == 1:
-                print("This automaton is already minimal !")
-        else:
-            print("NEW PARTS",new_parts)
-        partitions = new_parts.copy()
-
-    return from_parts(base, partitions) #now that we have our transitions, we can build a new automaton with them.
 
 def divide_part(automaton: Automaton, partition : list, group : list) -> list:
     """Divides a partition, based wether each element is in or out of 'group' """
@@ -94,6 +62,39 @@ def from_parts(base: Automaton, partitions : list) -> Automaton:
         new.table.append(trans)
 
     return new
+
+            
+
+
+
+#---------------------OPERATIONS
+def minimise(base: Automaton) -> Automaton:
+    """Transforms a CDFA to a MCDFA"""
+    partitions = [list(range(len(base.table)))] # = [ [0,1,...,n] ], logically the first partition is the whole automaton.
+    done = False
+    while not done:
+        new_parts = partitions.copy()
+
+        if len(partitions) == 1: #This only happens at the first iteration
+            new_parts.remove(partitions[0]) #we remove the partition, as it will be replaced by the spanned sub-groups
+            for part in divide_part(base, partitions[0], base.end): #As this is the first iteration, the checked group is the outputs
+                new_parts.append(part)
+        else:
+            for part in partitions:
+                new_parts.remove(part)
+                for part in divide_part(base, part, part): #At any other iteration, we only check if its in or out
+                    new_parts.append(part)
+
+        new_parts.sort(key= lambda l: l[0]) #we need to sort to enable list comparisons
+        if new_parts == partitions:
+            done = True
+            if len(partitions) == 1:
+                print("This automaton is already minimal !")
+        else:
+            print("NEW PARTS",new_parts)
+        partitions = new_parts.copy()
+
+    return from_parts(base, partitions) #now that we have our transitions, we can build a new automaton with them.
 
 def check(automaton: Automaton, string: str) -> bool:  # wont work with an asynchronous automaton (epsilon loops are hard to detect and curb)
     """Checks wether a string is validated by an automaton"""
@@ -205,7 +206,7 @@ def complement(automaton: Automaton) -> Automaton:
 
     return new
 
-
+#-----------------------------CHECKS-------------------------------------------------
 def is_standard(base: Automaton) -> bool:
     if len(base.ini) != 1: #Only one input
         return False
