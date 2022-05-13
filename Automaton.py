@@ -69,7 +69,7 @@ class Automaton():
         to_disp =' '*15
         tran = ''
         for char in self.univ:
-            to_disp += char + ' '*10
+            to_disp += char + ' '*12
 
 
         for i in range(len(self.table)):
@@ -97,5 +97,3 @@ class Automaton():
     def raw_disp(self): #used for debugging purposes
         for i in self.table:
             print(i)
-
-

@@ -45,7 +45,6 @@ def minimise(base: Automaton) -> Automaton:
 
 def divide_part(automaton: Automaton, partition : list, group : list) -> list:
     """Divides a partition, based wether each element is in or out of 'group' """
-
     patterns = {} #stores the whole table as patterns, uses a dictionary to refer ourselves to 'automaton' 's states
     for state in partition:
         trans = automaton.table[state]

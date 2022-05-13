@@ -1,4 +1,5 @@
 from enum import auto
+from venv import create
 from Automaton import Automaton
 from os.path import exists
 
@@ -18,6 +19,9 @@ def quit(args):
     global running
     running = False
 
+def flush(args):
+    global automatons
+    automatons = []
 
 def display(args):
     if args.isdigit():
@@ -25,8 +29,7 @@ def display(args):
         if ind < len(automatons):
             automatons[ind].display()
         else:
-            print(
-                "Index out of range, you can check the list of loaded automatons with  the command list")
+            print("Index out of range, you can check the list of loaded automatons with  the command list")
     else:
         print("Invalid argument, disp takes an integer as argument")
 
@@ -35,11 +38,36 @@ def create_deter(args):
     if args.isdigit():
         ind = int(args)
         if ind < len(automatons):
-            new = deter(automatons[int(args)])
-            automatons.append(new)
+            if is_deterministic(automatons[ind]):
+                print("This automaton is already deterministic !")
+                return #shhhhhhhh
+            automatons.append(deter(automatons[ind]))
         else:
-            print(
-                "Index out of range, you can check the list of loaded automatons with  the command list")
+            print("Index out of range, you can check the list of loaded automatons with  the command list")
+    else:
+        print("Invalid argument, determine takes an integer as argument")
+
+def create_minimal(args):
+    if args.isdigit():
+        ind = int(args)
+        if ind < len(automatons):
+            automatons.append(deter(automatons[ind]))
+        else:
+            print("Index out of range, you can check the list of loaded automatons with  the command list")
+    else:
+        print("Invalid argument, determine takes an integer as argument")
+
+
+def create_complete(args):
+    if args.isdigit():
+        ind = int(args)
+        if ind < len(automatons):
+            if is_complete(automatons[ind]):
+                print("This automaton is already complete!")
+                return 
+            automatons.append(complete(automatons[ind]))
+        else:
+            print("Index out of range, you can check the list of loaded automatons with  the command list")
     else:
         print("Invalid argument, determine takes an integer as argument")
 
@@ -51,7 +79,7 @@ def load(args):
         automatons.append(new)
         print("int4-1-"+args+".txt loaded")
     else:
-        print("Unable to load int4-1-l"+args+".txt. Make sure it's in txt/ and try again")
+        print("Unable to load int4-1-"+args+".txt. Make sure it's in txt/ and try again")
 
 
 def doc(args):
@@ -91,10 +119,15 @@ def doc(args):
         print("\nDETERMINE index")
         print(
             ' '*8 + "index - saves a determinized copy of the automaton at the given index")
+    elif args == "complete":
+        print("\nCOMPLETE index")
+        print(
+            ' '*8 + "index - saves a complete copy of the automaton at the given index")
 
 
-commands = {"help": doc, "quit": quit, "add": load,
-            "list": list_automatons, "disp": display, "determine": create_deter}
+commands = {"help": doc, "quit": quit, "add": load,"list": list_automatons,
+        "disp": display, "determine": create_deter, "complete":create_complete,
+        "flush":flush}
 
 
 def parse(entree):
