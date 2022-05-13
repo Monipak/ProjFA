@@ -106,9 +106,9 @@ def doc(args):
         print(' '*8 + "command - displays the usage of command")
         print(' '*8 + "-all - displays the usage of every command")
 
-    elif args == "add":
-        print("\nADD name")
-        print(' '*8 + "name - loads the file 'txt/name.txt into memory")
+    elif args == "load":
+        print("\nLOAD name")
+        print(' '*8 + "name - loads the file 'txt/int4-1-name.txt into memory")
 
     elif args == "list":
         print("\nLIST")
@@ -131,7 +131,7 @@ def doc(args):
             ' '*8 + "index - saves a complete copy of the automaton at the given index")
 
 
-commands = {"help": doc, "quit": quit, "add": load,"list": list_automatons,
+commands = {"help": doc, "quit": quit, "load": load,"list": list_automatons,
         "disp": display, "determine": create_deter, "complete":create_complete,
         "flush":flush}
 
