@@ -27,9 +27,15 @@ def display(args):
     if args.isdigit():
         ind = int(args)
         if ind < len(automatons):
+            print("\nAutomaton n°",i)
             automatons[ind].display()
         else:
-            print("Index out of range, you can check the list of loaded automatons with  the command list")
+            print(
+                "Index out of range, you can check the list of loaded automatons with the command list")
+    elif args == "all":
+        for i in range(len(automatons)):
+            print("\nAutomaton n°",i)
+            automatons[i].display()
     else:
         print("Invalid argument, disp takes an integer as argument")
 
