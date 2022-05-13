@@ -7,6 +7,7 @@ global names
 
 running = True
 automatons = []
+strings = []
 
 
 def list_automatons(args):
@@ -44,13 +45,13 @@ def create_deter(args):
 
 
 def load(args):
-    if exists("txt/"+args+".txt"):
+    if exists("txt/int4-1-"+args+".txt"):
         new = Automaton()
         new.load(args)
         automatons.append(new)
-        print(args+".txt loaded")
+        print("int4-1-"+args+".txt loaded")
     else:
-        print("Unable to load "+args+".txt. Make sure it's in txt/ and try again")
+        print("Unable to load int4-1-l"+args+".txt. Make sure it's in txt/ and try again")
 
 
 def doc(args):
