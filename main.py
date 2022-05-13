@@ -19,22 +19,24 @@ def quit(args):
     global running
     running = False
 
+
 def flush(args):
     global automatons
     automatons = []
+
 
 def display(args):
     if args.isdigit():
         ind = int(args)
         if ind < len(automatons):
-            print("\nAutomaton n°",i)
+            print("\nAutomaton n°", i)
             automatons[ind].display()
         else:
             print(
                 "Index out of range, you can check the list of loaded automatons with the command list")
     elif args == "all":
         for i in range(len(automatons)):
-            print("\nAutomaton n°",i)
+            print("\nAutomaton n°", i)
             automatons[i].display()
     else:
         print("Invalid argument, disp takes an integer as argument")
@@ -46,12 +48,14 @@ def create_deter(args):
         if ind < len(automatons):
             if is_deterministic(automatons[ind]):
                 print("This automaton is already deterministic !")
-                return #shhhhhhhh
+                return  # shhhhhhhh
             automatons.append(deter(automatons[ind]))
         else:
-            print("Index out of range, you can check the list of loaded automatons with  the command list")
+            print(
+                "Index out of range, you can check the list of loaded automatons with  the command list")
     else:
         print("Invalid argument, determine takes an integer as argument")
+
 
 def create_minimal(args):
     if args.isdigit():
@@ -59,7 +63,8 @@ def create_minimal(args):
         if ind < len(automatons):
             automatons.append(deter(automatons[ind]))
         else:
-            print("Index out of range, you can check the list of loaded automatons with  the command list")
+            print(
+                "Index out of range, you can check the list of loaded automatons with  the command list")
     else:
         print("Invalid argument, determine takes an integer as argument")
 
@@ -70,10 +75,11 @@ def create_complete(args):
         if ind < len(automatons):
             if is_complete(automatons[ind]):
                 print("This automaton is already complete!")
-                return 
+                return
             automatons.append(complete(automatons[ind]))
         else:
-            print("Index out of range, you can check the list of loaded automatons with  the command list")
+            print(
+                "Index out of range, you can check the list of loaded automatons with  the command list")
     else:
         print("Invalid argument, determine takes an integer as argument")
 
@@ -85,7 +91,17 @@ def load(args):
         automatons.append(new)
         print("int4-1-"+args+".txt loaded")
     else:
-        print("Unable to load int4-1-"+args+".txt. Make sure it's in txt/ and try again")
+        print("Unable to load int4-1-"+args +
+              ".txt. Make sure it's in txt/ and try again")
+
+
+def add(args):
+    global strings
+    inp = input("Enter a string to test for the automaton : ")
+    while inp != "done":
+        strings.append(inp)
+        inp = input(
+            "Enter a string to test for the automaton, or 'done' to stop : ")
 
 
 def doc(args):
@@ -106,9 +122,13 @@ def doc(args):
         print(' '*8 + "command - displays the usage of command")
         print(' '*8 + "-all - displays the usage of every command")
 
-    elif args == "add":
+    elif args == "load":
         print("\nADD name")
         print(' '*8 + "name - loads the file 'txt/name.txt into memory")
+
+    elif args == "add":
+        print("\n Enter a string to test for the automaton")
+        print("Enter 'done' if you're done")
 
     elif args == "list":
         print("\nLIST")
@@ -131,9 +151,9 @@ def doc(args):
             ' '*8 + "index - saves a complete copy of the automaton at the given index")
 
 
-commands = {"help": doc, "quit": quit, "add": load,"list": list_automatons,
-        "disp": display, "determine": create_deter, "complete":create_complete,
-        "flush":flush}
+commands = {"help": doc, "quit": quit, "load": load, "list": list_automatons,
+            "disp": display, "determine": create_deter, "complete": create_complete,
+            "flush": flush, "add": add}
 
 
 def parse(entree):
