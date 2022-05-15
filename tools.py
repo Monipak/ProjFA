@@ -4,12 +4,11 @@ from copy import deepcopy as copy
 
 #------------------USEFUL FUNCTIONS-------------------------------
 def union(l1, l2):
-    res = l1.copy()
     for i in l2:
-        if i not in res:
-            res.append(i)
-    res.sort()
-    return res
+        if i not in l1:
+            l1.append(i)
+    l1.sort()
+    return l1
 
 def divide_part(automaton: Automaton, partition : list, group : list) -> list:
     """Divides a partition, based wether each element is in or out of 'group' """
@@ -21,7 +20,6 @@ def divide_part(automaton: Automaton, partition : list, group : list) -> list:
             pattern[char] = trans[char][0] in group # True/False patterns
         patterns[state] = pattern
     
-
     seen_patterns = [] 
     new_partitions = [] #Both are stored in the same order, length is at most 2^alphabet_length
 
@@ -67,7 +65,8 @@ def from_parts(base: Automaton, partitions : list) -> Automaton:
 
 
 
-#---------------------OPERATIONS
+#---------------------OPERATIONS-----------------------------
+
 def minimise(base: Automaton) -> Automaton:
     """Transforms a CDFA to a MCDFA"""
     partitions = [list(range(len(base.table)))] # = [ [0,1,...,n] ], logically the first partition is the whole automaton.
@@ -91,12 +90,13 @@ def minimise(base: Automaton) -> Automaton:
             if len(partitions) == 1:
                 print("This automaton is already minimal !")
         else:
-            print("NEW PARTS",new_parts)
-        partitions = new_parts.copy()
+            pass
+            # print("NEW PARTS",new_parts)
+        partitions = new_parts
 
     return from_parts(base, partitions) #now that we have our transitions, we can build a new automaton with them.
 
-def check(automaton: Automaton, string: str) -> bool:  # wont work with an asynchronous automaton (epsilon loops are hard to detect and curb)
+def check(automaton: Automaton, string: str) -> bool:  # wont work with an asynchronous automaton (epsilon loops are hard to detect and curb, we need to do the e-closure fist)
     """Checks wether a string is validated by an automaton"""
     cursors = automaton.ini.copy() #places cursors at the initial states
     table = automaton.table
@@ -138,6 +138,19 @@ def standard(automaton: Automaton) -> Automaton:
 
     return new
 
+def e_connected(automaton : Automaton, state):
+    pseudo_state =[state]
+    if automaton.table[state].get('*'):
+        for e_jump in automaton.table[state]['*']:
+            if e_jump not in pseudo_state:
+                for st in e_connected(automaton, e_jump):
+                    pseudo_state.append(st)
+    pseudo_state.sort()
+    return pseudo_state
+
+#--------------------e_closure will be develloped for the presentation !!! ---------------------------
+
+
 def deter(base: Automaton) -> Automaton:
     """Determines an automaton"""
     new = Automaton()
@@ -153,7 +166,7 @@ def deter(base: Automaton) -> Automaton:
         pseudo_state = pending.pop(0)
 
         for i in pseudo_state: #Here we merge the transitions of the pseudostates into one transition
-            if i in base.end and state not in new.end: #if any of the member state is in the finals, the pseudo-state gets in the final
+            if i in base.end and state not in new.end: #if any of the member state is in the finals, the pseudo-state gets in the finals
                 new.end.append(state)
             
             for char in base.table[i]: 
@@ -237,11 +250,5 @@ def is_deterministic(base: Automaton) -> bool:
 if __name__ == "__main__":
     a = Automaton()
     a.load("test")
-
-    a = standard(a)
-    a = complete(a)
-    a = deter(a)
-    a.display()
-    a = minimise(a)
-    a.display_alias()
-    a.display()
+    a.raw_disp()
+    print(e_close(a))

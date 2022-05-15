@@ -1,7 +1,7 @@
-from enum import auto
-from venv import create
+
 from Automaton import Automaton
 from os.path import exists
+
 
 from tools import *
 global names
@@ -13,6 +13,31 @@ strings = []
 
 def list_automatons(args):
     print(str(len(automatons))+" loaded automaton(s)")
+
+def add(args):
+    global strings
+    inp = input("Enter strings to test for the automatons : ")
+    while inp != "done":
+        if '*' in inp:
+            print("Invalid string, cannot contain '*'")
+        else:
+            strings.append(inp)
+            inp = input(
+                "Enter a string to test for the automaton, or 'done' to stop : ")
+
+def checks(args):
+    global strings
+    global automatons
+    if args.isdigit():
+        ind = int(args)
+        if ind < len(automatons):
+            for strn in strings:
+                print(ind,strn,check(automatons[ind],strn))
+        else:
+            print(
+                "Index out of range, you can check the list of loaded automatons with the command list")
+    else:
+        print("Invalid argument, disp takes an integer as argument")
 
 
 def quit(args):
@@ -27,7 +52,7 @@ def display(args):
     if args.isdigit():
         ind = int(args)
         if ind < len(automatons):
-            print("\nAutomaton n°",i)
+            print("\nAutomaton n°",ind)
             automatons[ind].display()
         else:
             print(
@@ -87,6 +112,19 @@ def load(args):
     else:
         print("Unable to load int4-1-"+args+".txt. Make sure it's in txt/ and try again")
 
+def mini(args):
+    if args.isdigit():
+        ind = int(args)
+        if ind < len(automatons):
+            if not is_deterministic(automatons[ind]) or not is_complete(automatons[ind]):
+                print("This automaton is not deterministic and/or complete !")
+            else:
+                automatons.append(minimise(automatons[ind]))
+        else:
+            print("Index out of range, you can check the list of loaded automatons with  the command list")
+    else:
+        print("Invalid argument, determine takes an integer as argument")
+
 
 def doc(args):
     global commands
@@ -133,7 +171,7 @@ def doc(args):
 
 commands = {"help": doc, "quit": quit, "load": load,"list": list_automatons,
         "disp": display, "determine": create_deter, "complete":create_complete,
-        "flush":flush}
+        "flush":flush,"add":add,"check":checks,"minimise":mini}
 
 
 def parse(entree):
@@ -146,7 +184,7 @@ def parse(entree):
     else:
         print("Invalid command, type help for a list of commands")
 
-
+print("Enter a command, or help for a list of command (help command gives documentaiton about a command)")
 while running:
     parse(input())
     print()

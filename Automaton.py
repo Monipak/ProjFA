@@ -14,29 +14,31 @@ class Automaton():
             i = 0
             for line in fstream:
                 transitions = {}
-                for split in line.split(' '):
-                    split = split.replace('\n', '')
+                line = line.replace('\n','')
 
-                    #checks for final / initial flags
-                    if split[0] == 'I':
-                        self.ini.append(i)
-                    elif split[0] == 'F':
-                        self.end.append(i)
-                    elif split[0] == 'B':
-                        self.ini.append(i)
-                        self.end.append(i)
+                if line:
+                    for split in line.split(' '):
+                        #checks for final / initial flags
+                        if split[0] == 'I':
+                            self.ini.append(i)
+                        elif split[0] == 'F':
+                            self.end.append(i)
+                        elif split[0] == 'B':
+                            self.ini.append(i)
+                            self.end.append(i)
 
-                    else:
-                        if split[0] not in self.univ: #adds unknown characters
-                            self.univ.append(split[0])
-                        
-                        transition = []
-                        for j in range(1, len(split)): #skips the first character, which is the transition's character
-                            transition.append(int(split[j]))
-                        
-                        transitions[split[0]] = transition #map it to the said character
+                        else:
+                            if split[0] not in self.univ: #adds unknown characters
+                                self.univ.append(split[0])
+                            
+                            transition = []
+                            for j in range(1, len(split)): #skips the first character, which is the transition's character
+                                transition.append(int(split[j]))
+                            
+                            transitions[split[0]] = transition #map it to the said character
                 i+=1
                 self.table.append(transitions)
+
 
     def display(self):
         to_disp =' '*8
