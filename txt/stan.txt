@@ -1,4 +1,0 @@
-I a2 b0
-I a3
-F a0 b1
-F b2

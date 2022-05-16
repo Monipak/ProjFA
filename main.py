@@ -31,8 +31,12 @@ def checks(args):
     if args.isdigit():
         ind = int(args)
         if ind < len(automatons):
+            if not is_synchronous(automatons[ind]):
+                new = synchronise(automatons[ind])
+            else:
+                new = automatons[ind]
             for strn in strings:
-                print(ind,strn,check(automatons[ind],strn))
+                print(strn,check(new,strn))
         else:
             print(
                 "Index out of range, you can check the list of loaded automatons with the command list")
@@ -46,9 +50,14 @@ def quit(args):
 
 
 def flush(args):
-    global automatons
-    automatons = []
-
+    if not args:
+        automatons = []
+        print("Flushed the automatons !")
+    elif args == "strings":
+        strings = []
+        print("Flushed the testing batch !")
+    else:
+        print("Invalid argument, flush takes 'strings'/nothing as argument")
 
 def display(args):
     if args.isdigit():
@@ -64,7 +73,7 @@ def display(args):
             print("\nAutomaton n°", i)
             automatons[i].display()
     else:
-        print("Invalid argument, disp takes an integer as argument")
+        print("Invalid argument, disp takes an integer/'all' as argument")
 
 
 def create_deter(args):
@@ -73,8 +82,13 @@ def create_deter(args):
         if ind < len(automatons):
             if is_deterministic(automatons[ind]):
                 print("This automaton is already deterministic !")
-                return  # shhhhhhhh
-            automatons.append(deter(automatons[ind]))
+            elif not is_synchronous(automatons[ind]):
+                print("This automaton is not synchronous, please synchronise it using sync.")
+            else:
+                print("Added the determinised automaton at index "+ str(len(automatons)) +'!')
+                automatons.append(deter(automatons[ind]))
+                print("\nIn terms of old states :")
+                automatons[-1].display_alias()
         else:
             print(
                 "Index out of range, you can check the list of loaded automatons with  the command list")
@@ -82,16 +96,6 @@ def create_deter(args):
         print("Invalid argument, determine takes an integer as argument")
 
 
-def create_minimal(args):
-    if args.isdigit():
-        ind = int(args)
-        if ind < len(automatons):
-            automatons.append(deter(automatons[ind]))
-        else:
-            print(
-                "Index out of range, you can check the list of loaded automatons with  the command list")
-    else:
-        print("Invalid argument, determine takes an integer as argument")
 
 
 def create_complete(args):
@@ -100,14 +104,64 @@ def create_complete(args):
         if ind < len(automatons):
             if is_complete(automatons[ind]):
                 print("This automaton is already complete!")
-                return
-            automatons.append(complete(automatons[ind]))
+            elif not is_synchronous(automatons[ind]):
+                print("This automaton is not synchronous, please synchronise it using sync.")
+            else:
+                print("Added the completed automaton at index "+ str(len(automatons)) +'!')
+                automatons.append(complete(automatons[ind]))
         else:
             print(
                 "Index out of range, you can check the list of loaded automatons with  the command list")
     else:
-        print("Invalid argument, determine takes an integer as argument")
+        print("Invalid argument, complete takes an integer as argument")
 
+def create_minimal(args):
+    if args.isdigit():
+        ind = int(args)
+        if ind < len(automatons):
+            if not is_deterministic(automatons[ind]) or not is_complete(automatons[ind]):
+                print("This automaton is not deterministic and/or complete !")
+            elif not is_synchronous(automatons[ind]):
+                print("This automaton is not synchronous, please synchronise it using sync.")
+            else:
+                print("Added the minimised automaton at index "+ str(len(automatons)) +'!')
+                automatons.append(minimise(automatons[ind]))
+                print("\nIn terms of old states :")
+                automatons[-1].display_alias()
+        else:
+            print("Index out of range, you can check the list of loaded automatons with  the command list")
+    else:
+        print("Invalid argument, minimise takes an integer as argument")
+
+def create_synchronised(args):
+    if args.isdigit():
+        ind = int(args)
+        if ind < len(automatons):
+            if  is_synchronous(automatons[ind]):
+                print("This automaton already synchronous !")
+            else:
+                print("Added the synchronised automaton at index "+ str(len(automatons)) +'!')
+                automatons.append(synchronise(automatons[ind]))
+                print("\nIn terms of old states :")
+                automatons[-1].display_alias()
+        else:
+            print("Index out of range, you can check the list of loaded automatons with  the command list")
+    else:
+        print("Invalid argument, synchronise takes an integer as argument")
+
+def create_complement(args):
+    if args.isdigit():
+        ind = int(args)
+        if ind < len(automatons):
+            if not is_deterministic(automatons[ind]) or not is_complete(automatons[ind]):
+                print("This automaton is not deterministic and/or complete !")
+            else:
+                print("Added the complementarised automaton at index "+ str(len(automatons)) +'!')
+                automatons.append(synchronise(automatons[ind]))
+        else:
+            print("Index out of range, you can check the list of loaded automatons with  the command list")
+    else:
+        print("Invalid argument, synchronise takes an integer as argument")
 
 def load(args):
     if exists("txt/int4-1-"+args+".txt"):
@@ -128,19 +182,8 @@ def add(args):
         inp = input(
             "Enter a string to test for the automaton, or 'done' to stop : ")
 
-def mini(args):
-    if args.isdigit():
-        ind = int(args)
-        if ind < len(automatons):
-            if not is_deterministic(automatons[ind]) or not is_complete(automatons[ind]):
-                print("This automaton is not deterministic and/or complete !")
-            else:
-                automatons.append(minimise(automatons[ind]))
-        else:
-            print("Index out of range, you can check the list of loaded automatons with  the command list")
-    else:
-        print("Invalid argument, determine takes an integer as argument")
-
+def batch(args):
+    print(strings)
 
 def doc(args):
     global commands
@@ -161,19 +204,19 @@ def doc(args):
         print(' '*8 + "-all - displays the usage of every command")
 
     elif args == "load":
-        print("\nADD name")
+        print("\nLOAD name")
         print(' '*8 + "name - loads the file 'txt/name.txt into memory")
 
     elif args == "add":
-        print("\n Enter a string to test for the automaton")
-        print("Enter 'done' if you're done")
+        print("\nADD")
+        print("Allows to add strings to the testing batch")
 
     elif args == "list":
         print("\nLIST")
 
     elif args == "quit":
-        print("\nQUIT [-s]")
-        print(' '*8 + "-s saves every automaton in memory")
+        print("\nQUIT")
+        print(' '*8 + "Quits the program")
 
     elif args == "disp":
         print("\nDISP index")
@@ -187,11 +230,32 @@ def doc(args):
         print("\nCOMPLETE index")
         print(
             ' '*8 + "index - saves a complete copy of the automaton at the given index")
+    elif args == "minimise":
+        print("\nMINIMISE index")
+        print(
+            ' '*8 + "index - saves a minimised copy of the automaton at the given index")
+    elif args == "sync":
+        print("\nSYNC index")
+        print(
+            ' '*8 + "index - saves a synchronised copy of the automaton at the given index")
+    elif args == "flush":
+        print("\nFLUSH")
+        print(
+            ' '*8 + "flushes the list of automatons from memory")
+    elif args == "batch":
+        print("\nBATCH")
+        print(
+            ' '*8 + "shows the batch of strings to test")
+    elif args == "complement":
+        print("\nCOMPLEMENT index")
+        print(
+            ' '*8 + "index - saves a complementarised copy of the automaton at the given index")
 
 
 commands = {"help": doc, "quit": quit, "load": load,"list": list_automatons,
         "disp": display, "determine": create_deter, "complete":create_complete,
-        "flush":flush,"add":add,"check":checks,"minimise":mini}
+        "flush":flush,"add_strings":add,"check":checks,"minimise":create_minimal,"sync":create_synchronised,
+        "batch":batch,"complement":create_complement}
 
 
 def parse(entree):

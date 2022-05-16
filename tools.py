@@ -1,14 +1,16 @@
+from tkinter import N
 from Automaton import Automaton
 # deepcopy copie tout ce qui est dynamique dans un objet (leeeeeeeeeent)
 from copy import deepcopy as copy
 
 #------------------USEFUL FUNCTIONS-------------------------------
-def union(l1, l2):
+def union(l1 : list, l2 : list) -> list:
+    n = l1.copy()
     for i in l2:
-        if i not in l1:
-            l1.append(i)
-    l1.sort()
-    return l1
+        if i not in n:
+            n.append(i)
+    n.sort()
+    return n
 
 def divide_part(automaton: Automaton, partition : list, group : list) -> list:
     """Divides a partition, based wether each element is in or out of 'group' """
@@ -90,8 +92,7 @@ def minimise(base: Automaton) -> Automaton:
             if len(partitions) == 1:
                 print("This automaton is already minimal !")
         else:
-            pass
-            # print("NEW PARTS",new_parts)
+            print("NEW PARTS",new_parts)
         partitions = new_parts
 
     return from_parts(base, partitions) #now that we have our transitions, we can build a new automaton with them.
@@ -138,16 +139,65 @@ def standard(automaton: Automaton) -> Automaton:
 
     return new
 
-def e_connected(automaton : Automaton, state):
+def e_connected(automaton : Automaton, state : int) -> list:
     pseudo_state =[state]
     if automaton.table[state].get('*'):
         for e_jump in automaton.table[state]['*']:
             if e_jump not in pseudo_state:
-                for st in e_connected(automaton, e_jump):
+                for st in e_connected(automaton, e_jump): #Recursivity is the best way to scan a graph when memory is not an issue
                     pseudo_state.append(st)
     pseudo_state.sort()
     return pseudo_state
 
+def synchronise(base: Automaton) -> Automaton:
+    new = Automaton()
+    new.univ = base.univ.copy()
+    new.univ.remove('*') #We do not want to iterate on the * char
+    
+    new.ini = [0]
+
+    e_groups = []
+    for i in range(len(base.table)): #We determine every possible e_closure from each state
+        e_groups.append(e_connected(base, i))
+
+    pending = [[]]
+    for initial in base.ini:
+        pending[0] = union(pending[0],e_groups[initial])
+
+    pseudo_states = [pending[0]]
+    state = 0
+    while pending:
+        trans = {}
+        pseudo_trans = {}
+        pseudo_state = pending.pop(0)
+
+        for i in pseudo_state: #Here we merge the transitions of the pseudostates into one transition
+            if i in base.end and state not in new.end: #if any of the member state is in the finals, the pseudo-state gets in the finals
+                new.end.append(state)
+            for char in new.univ:
+                if base.table[i].get(char):
+                    for tran in base.table[i][char]:
+                        if not trans.get(char):
+                            trans[char] = e_groups[tran] #Particularity : we link transitions to the whole e_connected group
+                        else:
+                            trans[char] = union(trans[char], e_groups[tran])
+
+        for char in trans:
+            if trans[char] not in pseudo_states:
+                pseudo_states.append(trans[char])
+
+            index = pseudo_states.index(trans[char])
+            if trans[char] not in pending and index > state:
+                pending.append(trans[char])
+            pseudo_trans[char] = [index]
+        
+        new.table.append(pseudo_trans)
+        state += 1
+    
+    for i in range(len(pseudo_states)):
+        new.alias[i] = str(pseudo_states[i])[1:-1].replace(' ','')
+
+    return new
 #--------------------e_closure will be develloped for the presentation !!! ---------------------------
 
 
@@ -247,8 +297,14 @@ def is_deterministic(base: Automaton) -> bool:
                 return False
     return True
 
+def is_synchronous(base: Automaton) -> bool:
+    return '*' not in base.univ
+
 if __name__ == "__main__":
     a = Automaton()
-    a.load("test")
-    a.raw_disp()
-    print(e_close(a))
+    a.load('31')
+    a.display()
+    a = synchronise(a)
+    a.display()
+    a.display_alias()
+    print(a.ini,a.end)

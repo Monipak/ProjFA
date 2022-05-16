@@ -46,9 +46,7 @@ class Automaton():
         for char in self.univ:
             to_disp += char + ' '*10
 
-
         for i in range(len(self.table)):
-
             if i in self.ini and i in self.end:
                 to_disp += "\n<> "+str(i)+" ║ "
             elif i in self.ini:
